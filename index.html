@@ -14,85 +14,100 @@
 
 <canvas id="myCanvas" width="1900px" height="930px"></canvas>
 <script type="text/javascript">
-  let canvas, ctx,canvasWidth,canvasHeight,
-      snake=[], //身体数组
-      food={},
-      direction=39, //移动方向，默认向右
-      myInterval
-  ;
+  let canvas, ctx, canvasWidth, canvasHeight,
+      snake = [], //身体数组
+      food = {},
+      direction = 39, //移动方向，默认向右
+      myInterval;
+
   window.onload = function () {
     canvas = document.getElementById('myCanvas');
     //设置背景色
     canvas.style.backgroundColor = '#000';
-    canvasWidth=canvas.width;
-    canvasHeight=canvas.height;
+    canvasWidth = canvas.width;
+    canvasHeight = canvas.height;
     ctx = canvas.getContext('2d');
 
     //开局随机生成
-    food={
-      x:random10n(canvasWidth),
-      y:random10n(canvasHeight)
-    }
+    food = new coordinate(random10n(canvasWidth), random10n(canvasHeight));
 
     //监听键盘的上右下左
-    document.onkeydown=function(event){
+    document.onkeydown = function (event) {
       var e = event || window.event || arguments.callee.caller.arguments[0];
-      if(e && e.keyCode==40){ //下
-        direction=40;
+      if (e && e.keyCode == 40) { //下
+        if (direction != 38) direction = 40;
       }
-      if(e && e.keyCode==37){ //左
-        direction=37;
+      if (e && e.keyCode == 37) { //左
+        if (direction != 39) direction = 37;
       }
-      if(e && e.keyCode==39){ //右
-        direction=39;
+      if (e && e.keyCode == 39) { //右
+        if (direction != 37) direction = 39;
       }
-      if(e && e.keyCode==38){ // 上
-        direction=38;
+      if (e && e.keyCode == 38) { // 上
+        if (direction != 40) direction = 38;
       }
+      console.log('移动方向：', direction)
     };
-
     init()
-
     moveSnake()
-
   }
 
   //生成初始长度为6的
   function init() {
-    for (let i = 0; i <8 ; i++) {
-      snake.push({x:950-(i*10),y:460});
-      randomGenerate(950-(i*10),460)
+    for (let i = 0; i < 8; i++) {
+      snake.push(new coordinate(950 - (i * 10), 460));
+      randomGenerate(new coordinate(950 - (i * 10), 460))
 
     }
   }
 
   //移动
   function moveSnake() {
-    myInterval=setInterval(()=>{
-      let pop = snake.pop();
-      pop.x +=(snake.length+1)*10
-      snake.unshift(pop)
+
+    myInterval = setInterval(() => {
+      snake.pop()
+      let shift = snake[0];
+
+
 
       //清空画布
-      ctx.clearRect(0,0,canvasWidth,canvasHeight);
+      ctx.clearRect(0, 0, canvasWidth, canvasHeight);
 
       //蛇身
-      snake.map((item,index)=>{
-        randomGenerate(item.x,item.y)
-      })
-      //吃的
-      randomGenerate(food.x,food.y)
+      //判断移动方向
+      switch (direction) {
+        case 38: //上
 
-      if(snake[0].x>=1890){
+
+          break;
+        case 40: //下
+
+          break;
+        case 37: //左
+
+          break;
+        case 39: //右
+          let shiftx = shift.x;
+          shiftx+=10;
+          console.log(snake)
+          snake.unshift(new coordinate(shiftx,shift.y))
+          break;
+      }
+
+      snake.map((item, index) => {
+        randomGenerate(new coordinate(item.x, item.y))
+      })
+
+      //吃的
+      // randomGenerate(new coordinate(food.x, food.y))
+      if (snake[0].x >= canvasWidth - 10 || snake[0].x <= 0
+          || snake[0].y >= canvasHeight - 10 || snake[0].y <= 0) {
         console.log(snake)
         clearInterval(myInterval);
       }
-    },200)
-
-
-
+    }, 200)
   }
-  
+
   //画底
   function bottomDrawing() {
     if (canvas.width > 0 && canvas.height > 0) {
@@ -104,6 +119,7 @@
       }
     }
   }
+
   //画直线 x1,y1起点横纵坐标，x2,y2终点横纵坐标
   function drawLine(x1, y1, x2, y2) {
     //开始一条路径
@@ -121,26 +137,34 @@
     //渲染绘制
     ctx.stroke();
   }
-  //生成一个子
-  function randomGenerate(x, y) {
+
+  //画一个正方形
+  function randomGenerate(coordinate) {
     ctx.fillStyle = '#fff';
-    ctx.fillRect(x, y, 10, 10);
+    ctx.fillRect(coordinate.x, coordinate.y, 10, 10);
   }
-  //随机生成10倍数的坐标
+
+  //随机生成一个10的倍数
   function random10n(n) {
-    let inum = parseInt(Math.floor(n/10));
-    if(n == 0){
-      return 0;
+    let inum = parseInt(Math.floor(n / 10));
+    if (n == 0) {
+      return 0;
     }
     //如果不等于0则返回一个这个数的随机数，然后乘以8.
-    return parseInt(GetRandomInt(inum)*10);
-  }
-  function GetRandomInt(n) {
-    return parseInt(Math.floor(Math.random() * n));
+    return parseInt(GetRandomInt(inum) * 10);
   }
 
+  function GetRandomInt(n) {
+    return parseInt(Math.floor(Math.random() * n));
+  }
 
-
+  //坐标类
+  class coordinate {
+    constructor(x, y) {
+      this.x = x;
+      this.y = y;
+    }
+  }
 </script>
 </body>
 </html>
