@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Greedy snake</title>
+  <style type="text/css">
+    * {
+      padding: 0;
+      margin: 0;
+    }
+  </style>
+</head>
+<body>
+
+<canvas id="myCanvas" width="1900px" height="930px"></canvas>
+<script type="text/javascript">
+  let canvas, ctx,canvasWidth,canvasHeight,
+      snake=[], //身体数组
+      food={},
+      direction=39, //移动方向，默认向右
+      myInterval
+  ;
+  window.onload = function () {
+    canvas = document.getElementById('myCanvas');
+    //设置背景色
+    canvas.style.backgroundColor = '#000';
+    canvasWidth=canvas.width;
+    canvasHeight=canvas.height;
+    ctx = canvas.getContext('2d');
+
+    //开局随机生成
+    food={
+      x:random10n(canvasWidth),
+      y:random10n(canvasHeight)
+    }
+
+    //监听键盘的上右下左
+    document.onkeydown=function(event){
+      var e = event || window.event || arguments.callee.caller.arguments[0];
+      if(e && e.keyCode==40){ //下
+        direction=40;
+      }
+      if(e && e.keyCode==37){ //左
+        direction=37;
+      }
+      if(e && e.keyCode==39){ //右
+        direction=39;
+      }
+      if(e && e.keyCode==38){ // 上
+        direction=38;
+      }
+    };
+
+    init()
+
+    moveSnake()
+
+  }
+
+  //生成初始长度为6的
+  function init() {
+    for (let i = 0; i <8 ; i++) {
+      snake.push({x:950-(i*10),y:460});
+      randomGenerate(950-(i*10),460)
+
+    }
+  }
+
+  //移动
+  function moveSnake() {
+    myInterval=setInterval(()=>{
+      let pop = snake.pop();
+      pop.x +=(snake.length+1)*10
+      snake.unshift(pop)
+
+      //清空画布
+      ctx.clearRect(0,0,canvasWidth,canvasHeight);
+
+      //蛇身
+      snake.map((item,index)=>{
+        randomGenerate(item.x,item.y)
+      })
+      //吃的
+      randomGenerate(food.x,food.y)
+
+      if(snake[0].x>=1890){
+        console.log(snake)
+        clearInterval(myInterval);
+      }
+    },200)
+
+
+
+  }
+  
+  //画底
+  function bottomDrawing() {
+    if (canvas.width > 0 && canvas.height > 0) {
+      for (let i = 0; i < canvas.width; i += 10) {
+        for (let j = 0; j < canvas.height; j += 10) {
+          drawLine(i, j, canvas.width, j);
+          drawLine(i, j, i, canvas.height);
+        }
+      }
+    }
+  }
+  //画直线 x1,y1起点横纵坐标，x2,y2终点横纵坐标
+  function drawLine(x1, y1, x2, y2) {
+    //开始一条路径
+    ctx.beginPath();
+    //设置起点
+    ctx.moveTo(x1, y1);
+    //设置终点
+    ctx.lineTo(x2, y2);
+    //设置颜色
+    ctx.strokeStyle = "green";
+    //设置线条宽度
+    ctx.lineWidth = 1;
+    //闭合路径
+    ctx.closePath();
+    //渲染绘制
+    ctx.stroke();
+  }
+  //生成一个子
+  function randomGenerate(x, y) {
+    ctx.fillStyle = '#fff';
+    ctx.fillRect(x, y, 10, 10);
+  }
+  //随机生成10倍数的坐标
+  function random10n(n) {
+    let inum = parseInt(Math.floor(n/10));
+    if(n == 0){
+      return 0;
+    }
+    //如果不等于0则返回一个这个数的随机数，然后乘以8.
+    return parseInt(GetRandomInt(inum)*10);
+  }
+  function GetRandomInt(n) {
+    return parseInt(Math.floor(Math.random() * n));
+  }
+
+
+
+</script>
+</body>
+</html>
