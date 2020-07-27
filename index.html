@@ -12,13 +12,15 @@
 </head>
 <body>
 
-<canvas id="myCanvas" width="1900px" height="930px"></canvas>
+<canvas id="myCanvas" width="900px" height="900px"></canvas>
 <script type="text/javascript">
   let canvas, ctx, canvasWidth, canvasHeight,
       snake = [], //身体数组
-      food = {},
+      food = {}, //随机生成的子
       direction = 39, //移动方向，默认向右
-      myInterval;
+      myInterval,
+      fraction=0 //分数
+  ;
 
   window.onload = function () {
     canvas = document.getElementById('myCanvas');
@@ -28,8 +30,6 @@
     canvasHeight = canvas.height;
     ctx = canvas.getContext('2d');
 
-    //开局随机生成
-    food = new coordinate(random10n(canvasWidth), random10n(canvasHeight));
 
     //监听键盘的上右下左
     document.onkeydown = function (event) {
@@ -46,66 +46,181 @@
       if (e && e.keyCode == 38) { // 上
         if (direction != 40) direction = 38;
       }
-      console.log('移动方向：', direction)
+      // console.log('移动方向：', direction)
     };
+
+    food = new coordinate(random10n(canvasWidth), random10n(canvasHeight));
+
     init()
+
+
     moveSnake()
   }
 
-  //生成初始长度为6的
+  //生成初始长度
   function init() {
-    for (let i = 0; i < 8; i++) {
-      snake.push(new coordinate(950 - (i * 10), 460));
-      randomGenerate(new coordinate(950 - (i * 10), 460))
+    snake = [];
+    for (let i = 0; i < 18; i++) {
+      let coordinate1 = new coordinate(canvasWidth/2 - (i * 10), canvasHeight/2);
 
+      snake.push(coordinate1);
+      randomGenerate(coordinate1)
     }
   }
 
   //移动
   function moveSnake() {
-
     myInterval = setInterval(() => {
-      snake.pop()
-      let shift = snake[0];
-
-
-
       //清空画布
       ctx.clearRect(0, 0, canvasWidth, canvasHeight);
-
-      //蛇身
-      //判断移动方向
-      switch (direction) {
-        case 38: //上
-
-
-          break;
-        case 40: //下
-
-          break;
-        case 37: //左
-
-          break;
-        case 39: //右
-          let shiftx = shift.x;
-          shiftx+=10;
-          console.log(snake)
-          snake.unshift(new coordinate(shiftx,shift.y))
-          break;
-      }
-
+      //去掉最后一个
+      snake.pop()
+      let shift = snake[0];
+      //移动方向判定,传入蛇头参数
+      judgeDirection(shift)
       snake.map((item, index) => {
         randomGenerate(new coordinate(item.x, item.y))
       })
+      //吃子判定
+      increase();
+      //判断是否重合
+      generateFood();
+      //结束判定
+      death();
+    }, 50)
+  }
 
-      //吃的
-      // randomGenerate(new coordinate(food.x, food.y))
-      if (snake[0].x >= canvasWidth - 10 || snake[0].x <= 0
-          || snake[0].y >= canvasHeight - 10 || snake[0].y <= 0) {
-        console.log(snake)
-        clearInterval(myInterval);
+  //蛇身增长
+  function increase() {
+    //获取随机生成子的四个角
+
+    if(ifTouch(food,snake[0])){
+      console.log('吃子')
+      fraction+=1;
+      snake.unshift(food);
+    }
+
+    // let foodList=[food,
+    //   new coordinate(food.x + 10, food.y),
+    //   new coordinate(food.x, food.y + 10),
+    //   new coordinate(food.x + 10, food.y + 10)
+    // ]
+    //
+    // foodList.map((item,index)=>{
+    //   if(item.x==snake[0].x && item.y==snake[0].y){
+    //     console.log('吃子')
+    //
+    //     snake.unshift(food);
+    //
+    //     console.log(snake)
+    //   }
+    // })
+  }
+
+  //生成与蛇身不重合的子
+  function generateFood() {
+    snake.map((item, index) => {
+      if (item.x == food.x && item.y == food.y) {
+        console.log('重复');
+        food = new coordinate(random10n(canvasWidth), random10n(canvasHeight));
+        generateFood();
       }
-    }, 200)
+    })
+
+    randomGenerate(new coordinate(food.x, food.y))
+    //递归调用
+    return;
+  }
+
+  //判断移动方向并移动
+  function judgeDirection(shift) {
+    //判断移动方向
+    switch (direction) {
+      case 38: //上
+        let shifty = shift.y;
+        shifty -= 10;
+        // console.log(snake)
+        snake.unshift(new coordinate(shift.x, shifty))
+        break;
+      case 40: //下
+        let shifty1 = shift.y;
+        shifty1 += 10;
+        // console.log(snake)
+        snake.unshift(new coordinate(shift.x, shifty1))
+        break;
+      case 37: //左
+        let shiftx1 = shift.x;
+        shiftx1 -= 10;
+        // console.log(snake)
+        snake.unshift(new coordinate(shiftx1, shift.y))
+        break;
+      case 39: //右
+        let shiftx = shift.x;
+        shiftx += 10;
+        // console.log(snake)
+        snake.unshift(new coordinate(shiftx, shift.y))
+        break;
+    }
+  }
+
+  //游戏结束判定
+  function death() {
+    //碰到边界死亡
+    if (snake[0].x > canvasWidth  || snake[0].x < 0
+        || snake[0].y > canvasHeight  || snake[0].y < 0) {
+      end();
+    }
+    //碰到自己的身体死亡
+    for (let i = 4; i < snake.length; i++) {
+      // console.log('碰到自己',ifTouch(snake[0], snake[i]))
+
+      if(ifTouch(snake[0], snake[i])) end();
+    }
+  }
+
+  //判断两个点生成的小正方形是否有重合
+  function ifTouch(coordinate1, coordinate2) {
+
+    if(coordinate1.x+10 > coordinate2.x &&
+        coordinate1.y+10> coordinate2.y &&
+        coordinate2.x+10> coordinate1.x &&
+        coordinate2.y+10> coordinate1.y
+    ){
+      return true;
+    }
+    return  false;
+    // let coordinate1List = [coordinate1,
+    //   new coordinate(coordinate1.x + 10, coordinate1.y),
+    //   new coordinate(coordinate1.x, coordinate1.y + 10),
+    //   new coordinate(coordinate1.x + 10, coordinate1.y + 10)
+    // ];
+    // let coordinate2List = [coordinate2,
+    //   new coordinate(coordinate2.x + 10, coordinate2.y),
+    //   new coordinate(coordinate2.x, coordinate2.y + 10),
+    //   new coordinate(coordinate2.x + 10, coordinate2.y + 10)
+    // ]
+    // coordinate1List.map((item, index) => {
+    //   coordinate2List.map((item1, index1) => {
+    //     if (item.x == item1.x && item.y == item1.y) {
+    //       end();
+    //     }
+    //   })
+    // })
+  }
+
+  //游戏结束需要进行的一些操作
+  function end() {
+    clearInterval(myInterval);
+    alert(`游戏结束!得分:`+fraction)
+    //清空画布
+    ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+    //初始化
+    init()
+    //设置移动方向向右
+    direction = 39;
+    //得分设为0
+    fraction=0
+    moveSnake()
   }
 
   //画底
