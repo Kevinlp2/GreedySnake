@@ -19,16 +19,20 @@
 <div>
   <canvas id="myCanvas" width="600px" height="600px"></canvas>
 </div>
-
-
 <script type="text/javascript">
+  /**
+   贪吃蛇小游戏实现思路是以一个正方形的左上角为起始坐标画正方形，
+   在canvas画布中随机生成食物，蛇身是由几个正方形拼接起来。
+   键盘的 ↑↓←→ 控制蛇的移动方向
+   */
+
   let canvas, ctx, canvasWidth, canvasHeight,
       snake = [], //身体数组
       food = {}, //随机生成的子
       direction = 39, //移动方向，默认向右
       myInterval,
       fraction=0, //分数
-      size=20;
+      size=20,timer;
   window.onload = function () {
     canvas = document.getElementById('myCanvas');
     //设置背景色
@@ -37,8 +41,23 @@
     canvasHeight = canvas.height;
     ctx = canvas.getContext('2d');
 
-    //监听键盘的上右下左
-    document.onkeydown = function (event) {
+    //监听键盘的上右下左，方向不能逆向该变
+    document.onkeydown = event=>{debounce(event)};
+    init()
+    moveSnake()
+  }
+
+  /**
+   * 防抖函数 解决连续多次点击出错
+   * @param event
+   */
+  function debounce(event) {
+    if(timer){
+      clearTimeout(timer)
+    }
+    timer=setTimeout(()=>{
+      console.log('timer')
+      timer=undefined
       let e = event || window.event || arguments.callee.caller.arguments[0];
       if (e && e.keyCode == 40) { //下
         if (direction != 38) direction = 40;
@@ -50,10 +69,7 @@
       else if (e && e.keyCode == 38) { // 上
         if (direction != 40) direction = 38;
       }
-      // console.log('移动方向：', direction)
-    };
-    init()
-    moveSnake()
+    },100)
   }
 
   //生成初始长度
@@ -80,7 +96,6 @@
       snake.map((item, index) => {
         randomGenerate(new coordinate(item.x, item.y),'red')
       })
-
       //吃子判定
       increase();
       //判断是否重合
@@ -157,13 +172,11 @@
       end();
     }
     //碰到自己的身体死亡
-    for (let i = 3; i < snake.length; i++) {
+    for (let i = 2; i < snake.length; i++) {
       // console.log('碰到自己',ifTouch(snake[0], snake[i]))
-
       if(ifTouch(snake[0], snake[i])) end();
     }
   }
-
   //判断两个点生成的小正方形是否有重合
   function ifTouch(coordinate1, coordinate2) {
     //中心坐标
