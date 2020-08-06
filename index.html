@@ -17,7 +17,7 @@
 </head>
 <body>
 <div>
-  <canvas id="myCanvas" width="600px" height="600px"></canvas>
+  <canvas id="myCanvas" width="600px" height="600px">你的浏览器暂不支持</canvas>
 </div>
 <script type="text/javascript">
   /**
@@ -42,7 +42,7 @@
     ctx = canvas.getContext('2d');
 
     //监听键盘的上右下左，方向不能逆向该变
-    document.onkeydown = event=>{debounce(event)};
+    document.onkeydown =  event=>{debounce(event)};
     init()
     moveSnake()
   }
@@ -56,7 +56,7 @@
       clearTimeout(timer)
     }
     timer=setTimeout(()=>{
-      console.log('timer')
+      // console.log('timer')
       timer=undefined
       let e = event || window.event || arguments.callee.caller.arguments[0];
       if (e && e.keyCode == 40) { //下
