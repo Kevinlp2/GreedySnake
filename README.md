@@ -5,6 +5,10 @@
 在canvas画布中随机生成食物，蛇身是由几个正方形拼接起来。
 键盘的 ↑↓←→ 控制蛇的移动方向
 
+### 图片展示
+
+[![](https://www.mdeditor.com/images/logos/markdown.png)]
+
 ### 防抖函数 解决连续多次点击出错
 
 ```html
